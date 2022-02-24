@@ -1,0 +1,17 @@
+---
+
+- name: create SQL users group
+  ansible.windows.win_group:
+    name: '{{ sql_server_users_group_name }}'
+    description: '{{ sql_server_users_group_name }}'
+    state: present
+
+- name: set up SQL users
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    password: "{{ sql_server_svc_accounts_password }}"
+    password_never_expires: True
+    state: present
+    groups:
+      - '{{ sql_server_users_group_name }}'
+  loop: "{{ [sql_server_svc_account_name, sql_server_agt_svc_account_name] | unique }}"

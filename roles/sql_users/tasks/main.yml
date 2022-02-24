@@ -1,0 +1,8 @@
+---
+
+- include_tasks: domain.yml
+  run_once: yes
+  when: not sql_server_local_users
+
+- include_tasks: local.yml
+  when:  sql_server_local_users

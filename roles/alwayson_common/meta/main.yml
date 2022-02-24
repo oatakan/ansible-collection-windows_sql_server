@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Orcun Atakan
+  description: Ansible galaxy role for implementing prereq steps for SQL server AlwaysOn cluster.
+  role_name: alwayson_common
+  company: Red Hat
+  license: MIT
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: Windows
+      versions:
+        - all
+
+  galaxy_tags:
+    - windows
+    - sql_server
+    - mssql
+    - alwayson
+
+dependencies: []

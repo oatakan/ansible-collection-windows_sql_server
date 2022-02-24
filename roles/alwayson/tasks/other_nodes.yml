@@ -1,0 +1,40 @@
+---
+
+- name: set SqlAlwaysOnService
+  win_dsc:
+    resource_name: SqlAlwaysOnService
+    Ensure: 'Present'
+    ServerName: '{{ ansible_hostname }}'
+    InstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+
+- name: wait for availability group
+  win_dsc:
+    resource_name: SqlWaitForAG
+    ServerName: "{{ hostvars['cluster_first']['ansible_hostname'] }}"
+    Name: "{{ sql_server_availability_group_name }}"
+    RetryIntervalSec: 20
+    RetryCount: 30
+    InstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+
+- name: add replica
+  win_dsc:
+    resource_name: SqlAGReplica
+    Ensure: Present
+    Name: '{{ ansible_hostname | upper }}'
+    AvailabilityGroupName: "{{ sql_server_availability_group_name }}"
+    ServerName: '{{ ansible_hostname | upper }}'
+    InstanceName: '{{ sql_server_instance_name }}'
+    AvailabilityMode: SynchronousCommit
+    BackupPriority: 50
+    ConnectionModeInPrimaryRole: AllowAllConnections
+    ConnectionModeInSecondaryRole: AllowAllConnections
+    FailoverMode: Automatic
+    ProcessOnlyOnActiveNode: True
+    PrimaryReplicaServerName: "{{ hostvars['cluster_first']['ansible_hostname'] }}"
+    PrimaryReplicaInstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'

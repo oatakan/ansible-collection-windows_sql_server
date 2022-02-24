@@ -1,0 +1,3 @@
+---
+
+domain_prefix: "{{ ansible_hostname if (sql_server_local_users) else (dns_domain_name.split('.')[0]) }}"

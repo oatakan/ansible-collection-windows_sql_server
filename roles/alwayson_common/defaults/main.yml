@@ -1,0 +1,16 @@
+---
+
+dns_domain_name: example.com
+
+mssql_username: sqladmin
+mssql_password: ''
+
+sql_server_instance_name:  'MSSQLSERVER'
+
+sql_server_svc_account_name: SASQLSvcAccount
+sql_server_agt_svc_account_name: SAAgtSvcAccount
+sql_server_local_users: false
+
+sql_server_svc_account: '{{ domain_prefix | upper }}\{{ sql_server_svc_account_name }}'
+sql_server_agt_svc_account: '{{ domain_prefix | upper }}\{{ sql_server_agt_svc_account_name }}'
+cluster_svc_account: 'NT SERVICE\ClusSvc'

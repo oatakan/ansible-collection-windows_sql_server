@@ -1,0 +1,6 @@
+---
+
+first_node: false
+sql_server_availability_group_name: 'SQLAGN'
+sql_server_availability_group_ip_address: '192.168.100.11/255.255.255.0'
+sql_server_instance_name:  'MSSQLSERVER'

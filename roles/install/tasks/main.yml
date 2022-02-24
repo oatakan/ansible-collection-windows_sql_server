@@ -1,0 +1,94 @@
+---
+- name: Install required DSC modules
+  win_psmodule:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - NetworkingDsc
+    - SqlServerDsc
+
+- name: set up sqladmin user
+  win_user:
+    name: "{{ mssql_username }}"
+    password: "{{ mssql_password }}"
+    password_never_expires: True
+    state: present
+    groups:
+      - Administrators
+
+- name: install .Net
+  win_feature:
+    name: "{{ item }}"
+    state: present
+    include_sub_features: True
+    include_management_tools: True
+  with_items:
+    - NET-Framework-Core
+    - NET-Framework-Features
+  register: install_dotnet
+  until: install_dotnet is success
+  delay: 3
+  retries: 5
+
+- name: check ISO file
+  win_stat:
+    path: "{{ iso_path }}"
+  register: iso_file
+  when: (":" in iso_path)
+
+- include_tasks: download_iso.yml
+  when: (":" in iso_path) and (not iso_file.stat.exists)
+
+- block:
+    - name: mount iso
+      win_disk_image:
+        image_path: "{{ iso_path }}"
+        state: present
+      register: disk_image_out
+      until: disk_image_out is success
+      delay: 3
+      retries: 5
+
+    - name: install SQL Server
+      win_dsc:
+        resource_name: SqlSetup
+        InstanceName: '{{ sql_server_instance_name }}'
+        SourcePath: '{{ disk_image_out.mount_paths[0] }}'
+        Features: '{{ sql_server_features | join(",") }}'
+        InstallSharedDir: 'C:\Program Files\Microsoft SQL Server'
+        SQLSysAdminAccounts: '{{ sql_server_sys_admin_accounts }}'
+        SQLSvcAccount_username: '{{ sql_server_svc_account }}'
+        SQLSvcAccount_password: '{{ sql_server_svc_accounts_password }}'
+        AgtSvcAccount_username: '{{ sql_server_agt_svc_account }}'
+        AgtSvcAccount_password: '{{ sql_server_svc_accounts_password }}'
+        SecurityMode: SQL
+        SAPwd_username: sa
+        SAPwd_password: '{{ mssql_password }}'
+      register: sql_install
+
+  always:
+    - name: unmount iso
+      win_disk_image:
+        image_path: "{{ iso_path }}"
+        state: absent
+
+- name: enable tcp on SQL server instance
+  win_dsc:
+    resource_name: SqlServerNetwork
+    InstanceName: '{{ sql_server_instance_name }}'
+    ProtocolName: Tcp
+    TCPPort: 1433
+    TCPDynamicPort: False
+    IsEnabled: True
+    RestartService: True
+
+- name: Open port for MSSQL
+  win_dsc:
+    resource_name: Firewall
+    ensure: Present
+    name: MSSQL
+    enabled: True
+    localport: 1433
+    action: Allow
+    direction: Inbound
+    protocol: TCP

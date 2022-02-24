@@ -1,0 +1,85 @@
+---
+- name: Install required DSC modules
+  win_psmodule:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - SqlServerDsc
+
+- name: add users to SQL Server
+  win_dsc:
+    resource_name: SqlLogin
+    Ensure: Present
+    Name: "{{ item }}"
+    LoginType: 'WindowsUser'
+    ServerName: 'LocalHost'
+    InstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+  loop: "{{ [sql_server_svc_account, sql_server_agt_svc_account, cluster_svc_account] | unique }}"
+
+- name: configure SQL server permissions
+  win_dsc:
+    resource_name: SqlPermission
+    Ensure: Present
+    ServerName: 'LocalHost'
+    InstanceName: '{{ sql_server_instance_name }}'
+    Principal: '{{ item }}'
+    Permission:
+      - 'AlterAnyAvailabilityGroup'
+      - 'ViewServerState'
+      - 'AlterAnyEndPoint'
+      - 'ConnectSql'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+  loop: "{{ [sql_server_svc_account, sql_server_agt_svc_account] | unique }}"
+
+- name: configure SQL server permissions for cluster service
+  win_dsc:
+    resource_name: SqlPermission
+    Ensure: Present
+    ServerName: 'LocalHost'
+    InstanceName: '{{ sql_server_instance_name }}'
+    Principal: '{{ cluster_svc_account }}'
+    Permission:
+      - 'AlterAnyAvailabilityGroup'
+      - 'ViewServerState'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+
+- name: set SQL server role
+  win_dsc:
+    resource_name: SqlRole
+    Ensure: Present
+    ServerRoleName: 'sysadmin'
+    MembersToInclude:
+      - '{{ sql_server_svc_account }}'
+      - '{{ sql_server_agt_svc_account }}'
+    ServerName: 'LocalHost'
+    InstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+
+- name: set SQL server max memory
+  win_dsc:
+    resource_name: SqlMemory
+    Ensure: Present
+    DynamicAlloc: True
+    ServerName: 'LocalHost'
+    InstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'
+
+- include_tasks: service_delay.yml
+
+- name: set SQL Server Endpoint
+  win_dsc:
+    resource_name: SqlEndpoint
+    EndPointName: 'HADR'
+    Ensure: 'Present'
+    Port: 5022
+    EndpointType: 'DatabaseMirroring'
+    ServerName: '{{ ansible_hostname }}'
+    InstanceName: '{{ sql_server_instance_name }}'
+    PsDscRunAsCredential_username: '{{ mssql_username }}'
+    PsDscRunAsCredential_password: '{{ mssql_password }}'

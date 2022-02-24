@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: Orcun Atakan
+  description: Ansible galaxy role for creating cluster objects on AD.
+  role_name: ad_availability_group
+  company: Red Hat
+  license: MIT
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: Windows
+      versions:
+        - all
+
+  galaxy_tags:
+    - windows
+    - active_directory
+    - cluster
+    - sql_server
+    - mssql
+
+dependencies: []

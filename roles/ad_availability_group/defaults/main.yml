@@ -1,0 +1,10 @@
+---
+
+cluster_name: testcluster
+join_ou_path: ''
+dns_domain_name: 'example.com'
+sql_server_availability_group_listener_name: 'SQLAGN'
+sql_server_availability_group_ip_address: '192.168.100.11/255.255.255.0'
+sql_server_availability_group_ipv4_address: '{{ sql_server_availability_group_ip_address.split("/")[0] }}'
+
+windows_ad_server_ip: '192.168.100.10'

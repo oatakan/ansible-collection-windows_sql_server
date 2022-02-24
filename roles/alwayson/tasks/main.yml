@@ -1,0 +1,7 @@
+---
+
+- include_tasks: first_node.yml
+  when: first_node
+
+- include_tasks: other_nodes.yml
+  when: not first_node
