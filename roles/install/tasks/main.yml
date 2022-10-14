@@ -72,15 +72,20 @@
         image_path: "{{ iso_path }}"
         state: absent
 
-- name: enable tcp on SQL server instance
+- name: enable tcp protocol SQL server instance
   win_dsc:
-    resource_name: SqlServerNetwork
+    resource_name: SqlProtocol
     InstanceName: '{{ sql_server_instance_name }}'
-    ProtocolName: Tcp
+    ProtocolName: TcpIp
+    Enabled: True
+
+- name: enable tcp port on SQL server instance
+  win_dsc:
+    resource_name: SqlProtocolTcpIP
+    InstanceName: '{{ sql_server_instance_name }}'
+    IpAddressGroup: IPAll
     TCPPort: 1433
-    TCPDynamicPort: False
-    IsEnabled: True
-    RestartService: True
+    Enabled: True
 
 - name: Open port for MSSQL
   win_dsc:
