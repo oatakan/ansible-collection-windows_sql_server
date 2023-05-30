@@ -1,23 +1,23 @@
 ---
 
 - name: add a powershell module
-  win_psmodule:
+  community.windows.win_psmodule:
     name: ActiveDirectoryDsc
     state: present
 
 - name: enable windows features
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: WindowsFeature
     Name: "{{ item }}"
     IncludeAllSubFeature: True
     Ensure: Present
   register: install_ad
-  ignore_errors: yes
+  ignore_errors: true
   loop:
     - RSAT-AD-PowerShell
 
 - name: add computer object
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: ADComputer
     Ensure: Present
     ComputerName: "{{ sql_server_availability_group_listener_name }}"
@@ -30,7 +30,7 @@
     PsDscRunAsCredential_password: "{{ domain_admin_password }}"
 
 - name: add full control to cluster name object
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: ADObjectPermissionEntry
     Ensure: Present
     Path: 'CN={{ sql_server_availability_group_listener_name }},{{ join_ou_path }}'
@@ -45,12 +45,12 @@
 
 - block:
     - name: add a powershell module
-      win_psmodule:
+      community.windows.win_psmodule:
         name: DnsServerDsc
         state: present
 
     - name: Create DNS A record for AG
-      win_dsc:
+      ansible.windows.win_dsc:
         resource_name: DnsRecordA
         Ensure: Present
         Name: "{{ sql_server_availability_group_listener_name }}"
@@ -62,7 +62,7 @@
     ansible_password: "{{ domain_admin_password }}"
 
 - name: update ACL for DNS record of the CMO
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: ADObjectPermissionEntry
     Ensure: Present
     Path: 'DC={{ sql_server_availability_group_listener_name }},DC={{ dns_domain_name }},cn=MicrosoftDNS,DC=DomainDnsZones,DC={{ dns_domain_name.split(".")[0] }},DC={{ dns_domain_name.split(".")[1] }}'

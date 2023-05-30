@@ -1,28 +1,26 @@
 ---
 
 - name: add a powershell module
-  win_psmodule:
+  community.windows.win_psmodule:
     name: ActiveDirectoryDsc
     state: present
 
 - name: enable windows features
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: WindowsFeature
-    Name: "{{ item }}"
+    Name: RSAT-AD-PowerShell
     IncludeAllSubFeature: True
     Ensure: Present
   register: install_ad
-  ignore_errors: yes
-  loop:
-    - RSAT-AD-PowerShell
+  ignore_errors: true
 
 - name: Add windows group
-  win_domain_group:
+  community.windows.win_domain_group:
     name: '{{ sql_server_users_group_name }}'
     scope: global
 
 - name: add domain users
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: ADUser
     UserName: "{{ item }}"
     UserPrincipalName: "{{ item }}@{{ dns_domain_name }}"
@@ -42,7 +40,7 @@
   loop: "{{ [sql_server_svc_account_name, sql_server_agt_svc_account_name] | unique }}"
 
 - name: add domain users to sql group
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: ADGroup
     GroupName: '{{ sql_server_users_group_name }}'
     MembersToInclude: "{{ [sql_server_svc_account_name, sql_server_agt_svc_account_name] | unique }}"

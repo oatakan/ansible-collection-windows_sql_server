@@ -28,7 +28,10 @@ For SQL Server Stand Alone:
 
     ---
     - hosts: all
+      vars:
+        sql_server_local_users: true # use local users
       roles:
+        - oatakan.windows_sql_server.sql_users # create users
         - oatakan.windows_sql_server.install
 
 

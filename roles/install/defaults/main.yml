@@ -5,7 +5,7 @@ dns_domain_name: example.com
 mssql_username: sqladmin
 mssql_password: ''
 
-sql_server_instance_name:  'MSSQLSERVER'
+sql_server_instance_name: 'MSSQLSERVER'
 sql_server_sys_admin_accounts:
   - '{{ mssql_username }}'
 sql_server_features:

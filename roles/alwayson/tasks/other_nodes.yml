@@ -1,7 +1,7 @@
 ---
 
 - name: set SqlAlwaysOnService
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlAlwaysOnService
     Ensure: 'Present'
     ServerName: '{{ ansible_hostname }}'
@@ -10,7 +10,7 @@
     PsDscRunAsCredential_password: '{{ mssql_password }}'
 
 - name: wait for availability group
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlWaitForAG
     ServerName: "{{ hostvars['cluster_first']['ansible_hostname'] }}"
     Name: "{{ sql_server_availability_group_name }}"
@@ -21,7 +21,7 @@
     PsDscRunAsCredential_password: '{{ mssql_password }}'
 
 - name: add replica
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlAGReplica
     Ensure: Present
     Name: '{{ ansible_hostname | upper }}'

@@ -1,6 +1,6 @@
 namespace: "oatakan"
 name: "windows_sql_server"
-version: "0.1.0"
+version: "0.1.2"
 readme: "README.md"
 authors:
   - "Orcun Atakan (https://github.com/oatakan)"

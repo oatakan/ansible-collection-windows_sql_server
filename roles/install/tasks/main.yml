@@ -1,6 +1,6 @@
 ---
 - name: Install required DSC modules
-  win_psmodule:
+  community.windows.win_psmodule:
     name: "{{ item }}"
     state: present
   loop:
@@ -8,40 +8,40 @@
     - SqlServerDsc
 
 - name: set up sqladmin user
-  win_user:
+  ansible.windows.win_user:
     name: "{{ mssql_username }}"
     password: "{{ mssql_password }}"
-    password_never_expires: True
+    password_never_expires: true
     state: present
     groups:
       - Administrators
 
 - name: install .Net
-  win_feature:
-    name: "{{ item }}"
+  ansible.windows.win_feature:
+    name:
+      - NET-Framework-Core
+      - NET-Framework-Features
     state: present
-    include_sub_features: True
-    include_management_tools: True
-  with_items:
-    - NET-Framework-Core
-    - NET-Framework-Features
+    include_sub_features: true
+    include_management_tools: true
   register: install_dotnet
   until: install_dotnet is success
   delay: 3
   retries: 5
 
 - name: check ISO file
-  win_stat:
+  ansible.windows.win_stat:
     path: "{{ iso_path }}"
   register: iso_file
   when: (":" in iso_path)
 
-- include_tasks: download_iso.yml
+- name: download iso
+  ansible.builtin.include_tasks: download_iso.yml
   when: (":" in iso_path) and (not iso_file.stat.exists)
 
 - block:
     - name: mount iso
-      win_disk_image:
+      community.windows.win_disk_image:
         image_path: "{{ iso_path }}"
         state: present
       register: disk_image_out
@@ -50,7 +50,7 @@
       retries: 5
 
     - name: install SQL Server
-      win_dsc:
+      ansible.windows.win_dsc:
         resource_name: SqlSetup
         InstanceName: '{{ sql_server_instance_name }}'
         SourcePath: '{{ disk_image_out.mount_paths[0] }}'
@@ -68,19 +68,19 @@
 
   always:
     - name: unmount iso
-      win_disk_image:
+      community.windows.win_disk_image:
         image_path: "{{ iso_path }}"
         state: absent
 
 - name: enable tcp protocol SQL server instance
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlProtocol
     InstanceName: '{{ sql_server_instance_name }}'
     ProtocolName: TcpIp
     Enabled: True
 
 - name: enable tcp port on SQL server instance
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlProtocolTcpIP
     InstanceName: '{{ sql_server_instance_name }}'
     IpAddressGroup: IPAll
@@ -88,7 +88,7 @@
     Enabled: True
 
 - name: Open port for MSSQL
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: Firewall
     ensure: Present
     name: MSSQL

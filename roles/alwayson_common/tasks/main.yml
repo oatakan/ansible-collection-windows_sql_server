@@ -1,13 +1,14 @@
 ---
+
 - name: Install required DSC modules
-  win_psmodule:
+  community.windows.win_psmodule:
     name: "{{ item }}"
     state: present
   loop:
     - SqlServerDsc
 
 - name: add users to SQL Server
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlLogin
     Ensure: Present
     Name: "{{ item }}"
@@ -19,36 +20,39 @@
   loop: "{{ [sql_server_svc_account, sql_server_agt_svc_account, cluster_svc_account] | unique }}"
 
 - name: configure SQL server permissions
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlPermission
-    Ensure: Present
     ServerName: 'LocalHost'
     InstanceName: '{{ sql_server_instance_name }}'
-    Principal: '{{ item }}'
-    Permission:
-      - 'AlterAnyAvailabilityGroup'
-      - 'ViewServerState'
-      - 'AlterAnyEndPoint'
-      - 'ConnectSql'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    Name: '{{ item }}'
+    PermissionToInclude:
+      - State: Grant
+        Permission:
+          - 'AlterAnyAvailabilityGroup'
+          - 'ViewServerState'
+          - 'AlterAnyEndPoint'
+          - 'ConnectSql'
+    Credential_username: '{{ mssql_username }}'
+    Credential_password: '{{ mssql_password }}'
   loop: "{{ [sql_server_svc_account, sql_server_agt_svc_account] | unique }}"
 
 - name: configure SQL server permissions for cluster service
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlPermission
-    Ensure: Present
     ServerName: 'LocalHost'
     InstanceName: '{{ sql_server_instance_name }}'
-    Principal: '{{ cluster_svc_account }}'
-    Permission:
-      - 'AlterAnyAvailabilityGroup'
-      - 'ViewServerState'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    Name: '{{ cluster_svc_account }}'
+    PermissionToInclude:
+      - State: Grant
+        Permission:
+          - 'AlterAnyAvailabilityGroup'
+          - 'ViewServerState'
+          - 'AlterAnyEndPoint'
+    Credential_username: '{{ mssql_username }}'
+    Credential_password: '{{ mssql_password }}'
 
 - name: set SQL server role
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlRole
     Ensure: Present
     ServerRoleName: 'sysadmin'
@@ -61,7 +65,7 @@
     PsDscRunAsCredential_password: '{{ mssql_password }}'
 
 - name: set SQL server max memory
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlMemory
     Ensure: Present
     DynamicAlloc: True
@@ -70,10 +74,11 @@
     PsDscRunAsCredential_username: '{{ mssql_username }}'
     PsDscRunAsCredential_password: '{{ mssql_password }}'
 
-- include_tasks: service_delay.yml
+- name: service delay
+  ansible.builtin.include_tasks: service_delay.yml
 
 - name: set SQL Server Endpoint
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlEndpoint
     EndPointName: 'HADR'
     Ensure: 'Present'

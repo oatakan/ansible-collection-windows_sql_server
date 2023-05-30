@@ -1,7 +1,7 @@
 ---
 
 - name: download ISO file
-  win_get_url:
+  ansible.windows.win_get_url:
     dest: "{{ iso_path }}"
     url: "{{ iso_url }}"
   register: download_iso
@@ -10,12 +10,12 @@
   retries: 5
 
 - name: re-check ISO file
-  win_stat:
+  ansible.windows.win_stat:
     path: "{{ iso_path }}"
   register: iso_file_recheck
 
 - name: fail if file is not downloaded
-  fail:
+  ansible.builtin.fail:
     msg: "{{ iso_path }} doesn't exist"
   when:
     - download_iso is defined

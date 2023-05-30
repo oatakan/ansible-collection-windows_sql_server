@@ -1,7 +1,7 @@
 ---
 
 - name: set SqlAlwaysOnService
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlAlwaysOnService
     Ensure: 'Present'
     ServerName: '{{ ansible_hostname }}'
@@ -14,7 +14,7 @@
   retries: 10
 
 - name: set sql availability group
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlAG
     Ensure: Present
     Name: "{{ sql_server_availability_group_name }}"
@@ -26,7 +26,7 @@
     PsDscRunAsCredential_password: '{{ mssql_password }}'
 
 - name: set sql availability group listener
-  win_dsc:
+  ansible.windows.win_dsc:
     resource_name: SqlAGListener
     Ensure: Present
     Name: '{{ sql_server_availability_group_name }}'

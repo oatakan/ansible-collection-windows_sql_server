@@ -1,8 +1,8 @@
 ---
 
-- include_tasks: domain.yml
-  run_once: yes
+- ansible.builtin.include_tasks: domain.yml
+  run_once: true
   when: not sql_server_local_users
 
-- include_tasks: local.yml
-  when:  sql_server_local_users
+- ansible.builtin.include_tasks: local.yml
+  when: sql_server_local_users

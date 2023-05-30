@@ -1,7 +1,9 @@
 ---
 
-- include_tasks: first_node.yml
+- name: first node
+  ansible.builtin.include_tasks: first_node.yml
   when: first_node
 
-- include_tasks: other_nodes.yml
+- name: other nodes
+  ansible.builtin.include_tasks: other_nodes.yml
   when: not first_node
