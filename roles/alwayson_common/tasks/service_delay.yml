@@ -1,5 +1,4 @@
 ---
-
 - name: set dependencies
   ansible.windows.win_service:
     name: "{{ alwayson_common_sql_server_instance_name }}"
@@ -11,12 +10,12 @@
   ansible.windows.win_regedit:
     path: HKLM:\SYSTEM\CurrentControlSet\Services\{{ alwayson_common_sql_server_instance_name }}
     name: DelayedAutoStart
-    data: 0x01
+    data: "01"
     type: binary
 
 - name: set delayed auto start (sqlagent)
   ansible.windows.win_regedit:
     path: HKLM:\SYSTEM\CurrentControlSet\Services\sqlserveragent
     name: DelayedAutoStart
-    data: 0x01
+    data: "01"
     type: binary

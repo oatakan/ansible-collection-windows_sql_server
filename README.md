@@ -65,10 +65,12 @@ For SQL Server AlwaysOn cluster:
 ---
 - name: install sql server on all nodes
   hosts: all
+  vars:
+    sql_server_local_users: true # use local users
   roles:
     - oatakan.windows_cluster.join_domain
     - oatakan.windows_cluster.failover_common
-    - oatakan.windows_sql_server.sql_users # optional for using domain users for SQL server
+    - oatakan.windows_sql_server.sql_users # create users
     - oatakan.windows_sql_server.install
     - oatakan.windows_sql_server.alwayson_common
 

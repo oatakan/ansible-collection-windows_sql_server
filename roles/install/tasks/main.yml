@@ -76,13 +76,18 @@
 
 - name: enable tcp on SQL server instance
   ansible.windows.win_dsc:
-    resource_name: SqlServerNetwork
+    resource_name: SqlProtocol
     InstanceName: "{{ install_sql_server_instance_name }}"
-    ProtocolName: Tcp
+    ProtocolName: TcpIp
+    Enabled: true
+
+- name: enable tcp port on SQL server instance
+  ansible.windows.win_dsc:
+    resource_name: SqlProtocolTcpIP
+    InstanceName: "{{ sql_server_instance_name }}"
+    IpAddressGroup: IPAll
     TCPPort: 1433
-    TCPDynamicPort: false
-    IsEnabled: true
-    RestartService: true
+    Enabled: true
 
 - name: Open port for MSSQL
   ansible.windows.win_dsc:

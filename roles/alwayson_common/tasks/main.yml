@@ -21,31 +21,34 @@
 - name: configure SQL server permissions
   ansible.windows.win_dsc:
     resource_name: SqlPermission
-    Ensure: Present
     ServerName: LocalHost
     InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
-    Principal: "{{ item }}"
-    Permission:
-      - AlterAnyAvailabilityGroup
-      - ViewServerState
-      - AlterAnyEndPoint
-      - ConnectSql
-    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
-    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
+    Name: "{{ item }}"
+    PermissionToInclude:
+      - State: Grant
+        Permission:
+          - AlterAnyAvailabilityGroup
+          - ViewServerState
+          - AlterAnyEndPoint
+          - ConnectSql
+    Credential_username: "{{ alwayson_common_mssql_username }}"
+    Credential_password: "{{ alwayson_common_mssql_password }}"
   loop: "{{ [alwayson_common_sql_server_svc_account, alwayson_common_sql_server_agt_svc_account] | unique }}"
 
 - name: configure SQL server permissions for cluster service
   ansible.windows.win_dsc:
     resource_name: SqlPermission
-    Ensure: Present
     ServerName: LocalHost
     InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
-    Principal: "{{ alwayson_common_cluster_svc_account }}"
-    Permission:
-      - AlterAnyAvailabilityGroup
-      - ViewServerState
-    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
-    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
+    Name: "{{ cluster_svc_account }}"
+    PermissionToInclude:
+      - State: Grant
+        Permission:
+          - AlterAnyAvailabilityGroup
+          - ViewServerState
+          - AlterAnyEndPoint
+    Credential_username: "{{ alwayson_common_mssql_username }}"
+    Credential_password: "{{ alwayson_common_mssql_password }}"
 
 - name: set SQL server role
   ansible.windows.win_dsc:

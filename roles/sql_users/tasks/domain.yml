@@ -4,16 +4,14 @@
     name: ActiveDirectoryDsc
     state: present
 
-- name: enable windows features
+- name: enable windows feature
   ansible.windows.win_dsc:
     resource_name: WindowsFeature
-    Name: "{{ item }}"
+    Name: RSAT-AD-PowerShell
     IncludeAllSubFeature: true
     Ensure: Present
   register: install_ad
   failed_when: false
-  loop:
-    - RSAT-AD-PowerShell
 
 - name: Add windows group
   community.windows.win_domain_group:
