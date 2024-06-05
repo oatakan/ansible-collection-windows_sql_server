@@ -84,7 +84,7 @@
 - name: enable tcp port on SQL server instance
   ansible.windows.win_dsc:
     resource_name: SqlProtocolTcpIP
-    InstanceName: "{{ sql_server_instance_name }}"
+    InstanceName: "{{ install_sql_server_instance_name }}"
     IpAddressGroup: IPAll
     TCPPort: 1433
     Enabled: true

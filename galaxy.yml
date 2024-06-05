@@ -1,7 +1,7 @@
 ---
 namespace: oatakan
 name: windows_sql_server
-version: 1.0.2
+version: 1.0.3
 readme: README.md
 authors:
   - Orcun Atakan (https://github.com/oatakan)

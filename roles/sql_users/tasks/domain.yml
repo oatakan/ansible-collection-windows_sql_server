@@ -14,7 +14,7 @@
   failed_when: false
 
 - name: Add windows group
-  community.windows.win_domain_group:
+  microsoft.ad.group:
     name: "{{ sql_users_sql_server_users_group_name }}"
     scope: global
 
