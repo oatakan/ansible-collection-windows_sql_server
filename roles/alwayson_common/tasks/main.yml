@@ -40,7 +40,7 @@
     resource_name: SqlPermission
     ServerName: LocalHost
     InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
-    Name: "{{ cluster_svc_account }}"
+    Name: "{{ alwayson_common_cluster_svc_account }}"
     PermissionToInclude:
       - State: Grant
         Permission:
