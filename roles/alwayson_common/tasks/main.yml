@@ -1,5 +1,4 @@
 ---
-
 - name: Install required DSC modules
   community.windows.win_psmodule:
     name: "{{ item }}"
@@ -12,79 +11,75 @@
     resource_name: SqlLogin
     Ensure: Present
     Name: "{{ item }}"
-    LoginType: 'WindowsUser'
-    ServerName: 'LocalHost'
-    InstanceName: '{{ sql_server_instance_name }}'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
-  loop: "{{ [sql_server_svc_account, sql_server_agt_svc_account, cluster_svc_account] | unique }}"
+    LoginType: WindowsUser
+    ServerName: LocalHost
+    InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
+    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
+    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
+  loop: "{{ [alwayson_common_sql_server_svc_account, alwayson_common_sql_server_agt_svc_account, alwayson_common_cluster_svc_account] | unique }}"
 
 - name: configure SQL server permissions
   ansible.windows.win_dsc:
     resource_name: SqlPermission
-    ServerName: 'LocalHost'
-    InstanceName: '{{ sql_server_instance_name }}'
-    Name: '{{ item }}'
-    PermissionToInclude:
-      - State: Grant
-        Permission:
-          - 'AlterAnyAvailabilityGroup'
-          - 'ViewServerState'
-          - 'AlterAnyEndPoint'
-          - 'ConnectSql'
-    Credential_username: '{{ mssql_username }}'
-    Credential_password: '{{ mssql_password }}'
-  loop: "{{ [sql_server_svc_account, sql_server_agt_svc_account] | unique }}"
+    Ensure: Present
+    ServerName: LocalHost
+    InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
+    Principal: "{{ item }}"
+    Permission:
+      - AlterAnyAvailabilityGroup
+      - ViewServerState
+      - AlterAnyEndPoint
+      - ConnectSql
+    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
+    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
+  loop: "{{ [alwayson_common_sql_server_svc_account, alwayson_common_sql_server_agt_svc_account] | unique }}"
 
 - name: configure SQL server permissions for cluster service
   ansible.windows.win_dsc:
     resource_name: SqlPermission
-    ServerName: 'LocalHost'
-    InstanceName: '{{ sql_server_instance_name }}'
-    Name: '{{ cluster_svc_account }}'
-    PermissionToInclude:
-      - State: Grant
-        Permission:
-          - 'AlterAnyAvailabilityGroup'
-          - 'ViewServerState'
-          - 'AlterAnyEndPoint'
-    Credential_username: '{{ mssql_username }}'
-    Credential_password: '{{ mssql_password }}'
+    Ensure: Present
+    ServerName: LocalHost
+    InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
+    Principal: "{{ alwayson_common_cluster_svc_account }}"
+    Permission:
+      - AlterAnyAvailabilityGroup
+      - ViewServerState
+    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
+    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
 
 - name: set SQL server role
   ansible.windows.win_dsc:
     resource_name: SqlRole
     Ensure: Present
-    ServerRoleName: 'sysadmin'
+    ServerRoleName: sysadmin
     MembersToInclude:
-      - '{{ sql_server_svc_account }}'
-      - '{{ sql_server_agt_svc_account }}'
-    ServerName: 'LocalHost'
-    InstanceName: '{{ sql_server_instance_name }}'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+      - "{{ alwayson_common_sql_server_svc_account }}"
+      - "{{ alwayson_common_sql_server_agt_svc_account }}"
+    ServerName: LocalHost
+    InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
+    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
+    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
 
 - name: set SQL server max memory
   ansible.windows.win_dsc:
     resource_name: SqlMemory
     Ensure: Present
-    DynamicAlloc: True
-    ServerName: 'LocalHost'
-    InstanceName: '{{ sql_server_instance_name }}'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    DynamicAlloc: true
+    ServerName: LocalHost
+    InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
+    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
+    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"
 
-- name: service delay
+- name: configure service delay
   ansible.builtin.include_tasks: service_delay.yml
-
 - name: set SQL Server Endpoint
   ansible.windows.win_dsc:
     resource_name: SqlEndpoint
-    EndPointName: 'HADR'
-    Ensure: 'Present'
+    EndPointName: HADR
+    Ensure: Present
     Port: 5022
-    EndpointType: 'DatabaseMirroring'
-    ServerName: '{{ ansible_hostname }}'
-    InstanceName: '{{ sql_server_instance_name }}'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    EndpointType: DatabaseMirroring
+    ServerName: "{{ ansible_hostname }}"
+    InstanceName: "{{ alwayson_common_sql_server_instance_name }}"
+    PsDscRunAsCredential_username: "{{ alwayson_common_mssql_username }}"
+    PsDscRunAsCredential_password: "{{ alwayson_common_mssql_password }}"

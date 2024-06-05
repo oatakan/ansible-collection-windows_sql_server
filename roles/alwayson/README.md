@@ -23,10 +23,10 @@ Requirements
 Role Variables
 --------------
 
-- first_node: false
-- sql_server_availability_group_name: 'SQLAGN'
-- sql_server_availability_group_ip_address: '192.168.100.11/255.255.255.0'
-- sql_server_instance_name:  'MSSQLSERVER'
+- alwayson_first_node: false
+- alwayson_sql_server_availability_group_name: 'SQLAGN'
+- alwayson_sql_server_availability_group_ip_address: '192.168.100.11/255.255.255.0'
+- alwayson_sql_server_instance_name:  'MSSQLSERVER'
 
 Dependencies
 ------------
@@ -35,18 +35,21 @@ Dependencies
 
 Example Playbook
 ----------------
+```yaml
+---
+- name: set up alwayson (primary)
+  hosts: primary_server
+  roles:
+    - oatakan.windows_sql_server.ad_availability_group # this needs to be set up once per AD
+    - role: alwayson
+      alwayson_first_node: true
 
-    - hosts: primary_server
-      roles:
-        - oatakan.windows_sql_server.ad_availability_group # this needs to be set up once per AD
-        - role: alwayson
-          first_node: true
-
-    - hosts: secondary_server
-      roles:
-        - role: alwayson
-          first_node: false
-
+- name: set up alwayson (secondary)
+  hosts: secondary_server
+  roles:
+    - role: alwayson
+      alwayson_first_node: false
+```
 License
 -------
 

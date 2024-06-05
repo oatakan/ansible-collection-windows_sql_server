@@ -1,4 +1,4 @@
 ---
-
-- ansible.builtin.include_tasks: ag.yml
+- name: configure availability group
+  ansible.builtin.include_tasks: ag.yml
   run_once: true

@@ -12,6 +12,31 @@ It includes the following roles:
   - install
   - sql_users
 
+## Publishing to Ansible Galaxy
+
+This section provides a guide on how to build and publish this collection to the Ansible Galaxy.
+
+### Generating the Changelog
+
+1. Navigate to the root directory of your local repository where `galaxy.yml` is located.
+2. Run the following command to build the collection:
+   ```shell
+   antsibull-changelog release
+   ```
+### Building the Collection
+
+1. Navigate to the root directory of your local repository where `galaxy.yml` is located.
+2. Run the following command to build the collection:
+   ```shell
+   ansible-galaxy collection build
+   ```
+### Publishing the Collection
+
+1. Navigate to the root directory of your local repository where `galaxy.yml` is located.
+2. Run the following command to publish the collection:
+   ```shell
+   ansible-galaxy collection publish oatakan-windows_sql_server-1.0.0.tar.gz
+   ```
 ## Requirements
 
 - oatakan.windows_cluster (collection)
@@ -19,58 +44,64 @@ It includes the following roles:
 ## Usage
 
 Install this collection locally:
-
-    ansible-galaxy collection install oatakan.windows_sql_server -p ./collections
-
+   ```shell
+   ansible-galaxy collection install oatakan.windows_sql_server -p ./collections
+   ```
 Then you can use the roles from the collection in your playbooks.
 
 For SQL Server Stand Alone:
 
-    ---
-    - hosts: all
-      vars:
-        sql_server_local_users: true # use local users
-      roles:
-        - oatakan.windows_sql_server.sql_users # create users
-        - oatakan.windows_sql_server.install
+```yaml
+ ---
+ - hosts: all
+   roles:
+     - oatakan.windows_sql_server.install
+```
 
 
 For SQL Server AlwaysOn cluster:
 
-    ---
-    - hosts: all
-      roles:
-        - oatakan.windows_cluster.join_domain
-        - oatakan.windows_cluster.failover_common
-        - oatakan.windows_sql_server.sql_users # optional for using domain users for SQL server
-        - oatakan.windows_sql_server.install
-        - oatakan.windows_sql_server.alwayson_common
+```yaml
+---
+- name: install sql server on all nodes
+  hosts: all
+  roles:
+    - oatakan.windows_cluster.join_domain
+    - oatakan.windows_cluster.failover_common
+    - oatakan.windows_sql_server.sql_users # optional for using domain users for SQL server
+    - oatakan.windows_sql_server.install
+    - oatakan.windows_sql_server.alwayson_common
 
-    - hosts: primary_server
-      roles:
-        - role: oatakan.windows_cluster.failover
-          first_node: true
-      post_tasks:
-        # this will set the ip address and hostname of the first node so that it's acccessible from the subsequent plays.
-        - name: set cluster_first node
-          add_host:
-            name: cluster_first
-            ip_address:  "{{ ansible_ip_addresses[0] | default(ansible_host) | default(ansible_ssh_host) }}"
-            ansible_hostname: "{{ ansible_hostname | default(ansible_host) | default(ansible_ssh_host) }}"
+- name: set up cluster (primary)
+  hosts: primary_server
+  roles:
+    - role: oatakan.windows_cluster.failover
+      first_node: true
+  post_tasks:
+    # this will set the ip address and hostname of the first node so that it's acccessible from the subsequent plays.
+    - name: set cluster_first node
+      add_host:
+        name: cluster_first
+        ip_address:  "{{ ansible_ip_addresses[0] | default(ansible_host) | default(ansible_ssh_host) }}"
+        ansible_hostname: "{{ ansible_hostname | default(ansible_host) | default(ansible_ssh_host) }}"
 
-    - hosts: secondary_server
-      roles:
-        - role: oatakan.windows_cluster.failover
-          first_node: false
+- name: set up cluster (secondary)
+  hosts: secondary_server
+  roles:
+    - role: oatakan.windows_cluster.failover
+      first_node: false
 
-    # after fully functional Windows cluster, we move onto setting up alwayson cluster
-    - hosts: primary_server
-      roles:
-        - oatakan.windows_sql_server.ad_availability_group # this needs to be set up once per AD
-        - role: oatakan.windows_sql_server.alwayson
-          first_node: true
+# after fully functional Windows cluster, we move onto setting up alwayson cluster
+- name: alwayson configuration (primary)
+  hosts: primary_server
+  roles:
+    - oatakan.windows_sql_server.ad_availability_group # this needs to be set up once per AD
+    - role: oatakan.windows_sql_server.alwayson
+      first_node: true
 
-    - hosts: secondary_server
-      roles:
-        - role: oatakan.windows_sql_server.alwayson
-          first_node: false
+- name: alwayson configuration (secondary)
+  hosts: secondary_server
+  roles:
+    - role: oatakan.windows_sql_server.alwayson
+      first_node: false
+```

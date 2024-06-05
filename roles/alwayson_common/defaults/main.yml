@@ -1,16 +1,16 @@
 ---
 
-dns_domain_name: example.com
+alwayson_common_dns_domain_name: "{{ dns_domain_name | default('example.com') }}"
 
-mssql_username: sqladmin
-mssql_password: ''
+alwayson_common_mssql_username: "{{ mssql_username | default('sqladmin') }}"
+alwayson_common_mssql_password: "{{ mssql_password | default('') }}"
 
-sql_server_instance_name:  'MSSQLSERVER'
+alwayson_common_sql_server_instance_name: "{{ sql_server_instance_name | default('MSSQLSERVER') }}"
 
-sql_server_svc_account_name: SASQLSvcAccount
-sql_server_agt_svc_account_name: SAAgtSvcAccount
-sql_server_local_users: false
+alwayson_common_sql_server_svc_account_name: "{{ sql_server_svc_account_name | default('SASQLSvcAccount') }}"
+alwayson_common_sql_server_agt_svc_account_name: "{{ sql_server_agt_svc_account_name | default('SAAgtSvcAccount') }}"
+alwayson_common_sql_server_local_users: "{{ sql_server_local_users | default(false) }}"
 
-sql_server_svc_account: '{{ domain_prefix | upper }}\{{ sql_server_svc_account_name }}'
-sql_server_agt_svc_account: '{{ domain_prefix | upper }}\{{ sql_server_agt_svc_account_name }}'
-cluster_svc_account: 'NT SERVICE\ClusSvc'
+alwayson_common_sql_server_svc_account: "{{ alwayson_common_domain_prefix | upper }}\\{{ alwayson_common_sql_server_svc_account_name }}"
+alwayson_common_sql_server_agt_svc_account: "{{ alwayson_common_domain_prefix | upper }}\\{{ alwayson_common_sql_server_agt_svc_account_name }}"
+alwayson_common_cluster_svc_account: "{{ cluster_svc_account | default('NT SERVICE\\ClusSvc') }}"

@@ -1,19 +1,20 @@
-namespace: "oatakan"
-name: "windows_sql_server"
-version: "0.1.2"
-readme: "README.md"
+---
+namespace: oatakan
+name: windows_sql_server
+version: 1.0.0
+readme: README.md
 authors:
-  - "Orcun Atakan (https://github.com/oatakan)"
-description: "This collection contains example roles for setting up Windows SQL Server Stand Alone or AlwaysOn cluster."
+  - Orcun Atakan (https://github.com/oatakan)
+description: This collection contains example roles for setting up Windows SQL Server Stand Alone or AlwaysOn cluster.
 license:
-  - "MIT"
+  - MIT
 tags:
   - windows
   - cluster
   - mssql
   - sql_server
   - alwayson
-repository: "https://www.github.com/oatakan/ansible-collection-windows_sql_server"
-homepage: "https://www.github.com/oatakan/ansible-collection-windows_sql_server"
-documentation: "https://oatakan.github.io/ansible-collection-windows_sql_server/"
-issues: "https://www.github.com/oatakan/ansible-collection-windows_sql_server/issues"
+repository: https://www.github.com/oatakan/ansible-collection-windows_sql_server
+homepage: https://www.github.com/oatakan/ansible-collection-windows_sql_server
+documentation: https://oatakan.github.io/ansible-collection-windows_sql_server/
+issues: https://www.github.com/oatakan/ansible-collection-windows_sql_server/issues

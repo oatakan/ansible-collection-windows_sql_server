@@ -1,6 +1,6 @@
 ---
 
-first_node: false
-sql_server_availability_group_name: 'SQLAGN'
-sql_server_availability_group_ip_address: '192.168.100.11/255.255.255.0'
-sql_server_instance_name: 'MSSQLSERVER'
+alwayson_first_node: "{{ first_node | default(false) }}"
+alwayson_sql_server_availability_group_name: "{{ sql_server_availability_group_name | default('SQLAGN') }}"
+alwayson_sql_server_availability_group_ip_address: "{{ sql_server_availability_group_ip_address | default('192.168.100.11/255.255.255.0') }}"
+alwayson_sql_server_instance_name: "{{ sql_server_instance_name | default('MSSQLSERVER') }}"

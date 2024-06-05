@@ -1,9 +1,8 @@
 ---
-
-- name: first node
+- name: setup first node
   ansible.builtin.include_tasks: first_node.yml
-  when: first_node
+  when: alwayson_first_node
 
-- name: other nodes
+- name: setup other nodes
   ansible.builtin.include_tasks: other_nodes.yml
-  when: not first_node
+  when: not alwayson_first_node

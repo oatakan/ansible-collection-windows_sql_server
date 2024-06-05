@@ -1,5 +1,4 @@
 ---
-
 - name: add a powershell module
   community.windows.win_psmodule:
     name: ActiveDirectoryDsc
@@ -8,41 +7,43 @@
 - name: enable windows features
   ansible.windows.win_dsc:
     resource_name: WindowsFeature
-    Name: RSAT-AD-PowerShell
-    IncludeAllSubFeature: True
+    Name: "{{ item }}"
+    IncludeAllSubFeature: true
     Ensure: Present
   register: install_ad
-  ignore_errors: true
+  failed_when: false
+  loop:
+    - RSAT-AD-PowerShell
 
 - name: Add windows group
   community.windows.win_domain_group:
-    name: '{{ sql_server_users_group_name }}'
+    name: "{{ sql_users_sql_server_users_group_name }}"
     scope: global
 
 - name: add domain users
   ansible.windows.win_dsc:
     resource_name: ADUser
     UserName: "{{ item }}"
-    UserPrincipalName: "{{ item }}@{{ dns_domain_name }}"
+    UserPrincipalName: "{{ item }}@{{ sql_users_dns_domain_name }}"
     Password_username: "{{ item }}"
-    Password_password: "{{ sql_server_svc_accounts_password }}"
-    DomainName: "{{ dns_domain_name }}"
-    Credential_username: "{{ domain_admin_username }}@{{ dns_domain_name }}"
+    Password_password: "{{ sql_users_sql_server_svc_accounts_password }}"
+    DomainName: "{{ sql_users_dns_domain_name }}"
+    Credential_username: "{{ domain_admin_username }}@{{ sql_users_dns_domain_name }}"
     Credential_password: "{{ domain_admin_password }}"
-    Enabled: True
-    PasswordNeverExpires: True
-    ChangePasswordAtLogon: False
+    Enabled: true
+    PasswordNeverExpires: true
+    ChangePasswordAtLogon: false
     GivenName: "{{ item }}"
     Surname: user
     Company: AnsibleByRedHat
-    EmailAddress: "{{ item }}@{{ dns_domain_name }}"
+    EmailAddress: "{{ item }}@{{ sql_users_dns_domain_name }}"
     Ensure: Present
-  loop: "{{ [sql_server_svc_account_name, sql_server_agt_svc_account_name] | unique }}"
+  loop: "{{ [sql_users_sql_server_svc_account_name, sql_users_sql_server_agt_svc_account_name] | unique }}"
 
 - name: add domain users to sql group
   ansible.windows.win_dsc:
     resource_name: ADGroup
-    GroupName: '{{ sql_server_users_group_name }}'
-    MembersToInclude: "{{ [sql_server_svc_account_name, sql_server_agt_svc_account_name] | unique }}"
-    Credential_username: "{{ domain_admin_username }}@{{ dns_domain_name }}"
+    GroupName: "{{ sql_users_sql_server_users_group_name }}"
+    MembersToInclude: "{{ [sql_users_sql_server_svc_account_name, sql_users_sql_server_agt_svc_account_name] | unique }}"
+    Credential_username: "{{ domain_admin_username }}@{{ sql_users_dns_domain_name }}"
     Credential_password: "{{ domain_admin_password }}"

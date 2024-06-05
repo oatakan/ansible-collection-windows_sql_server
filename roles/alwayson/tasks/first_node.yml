@@ -1,13 +1,12 @@
 ---
-
 - name: set SqlAlwaysOnService
   ansible.windows.win_dsc:
     resource_name: SqlAlwaysOnService
-    Ensure: 'Present'
-    ServerName: '{{ ansible_hostname }}'
-    InstanceName: '{{ sql_server_instance_name }}'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    Ensure: Present
+    ServerName: "{{ ansible_hostname }}"
+    InstanceName: "{{ alwayson_sql_server_instance_name }}"
+    PsDscRunAsCredential_username: "{{ mssql_username }}"
+    PsDscRunAsCredential_password: "{{ mssql_password }}"
   register: set_sql_always_on_service
   until: set_sql_always_on_service is success
   delay: 5
@@ -17,23 +16,23 @@
   ansible.windows.win_dsc:
     resource_name: SqlAG
     Ensure: Present
-    Name: "{{ sql_server_availability_group_name }}"
-    ServerName: '{{ ansible_hostname }}'
-    InstanceName: '{{ sql_server_instance_name }}'
-    AvailabilityMode: 'SynchronousCommit'
-    FailoverMode: 'Automatic'
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    Name: "{{ alwayson_sql_server_availability_group_name }}"
+    ServerName: "{{ ansible_hostname }}"
+    InstanceName: "{{ alwayson_sql_server_instance_name }}"
+    AvailabilityMode: SynchronousCommit
+    FailoverMode: Automatic
+    PsDscRunAsCredential_username: "{{ mssql_username }}"
+    PsDscRunAsCredential_password: "{{ mssql_password }}"
 
 - name: set sql availability group listener
   ansible.windows.win_dsc:
     resource_name: SqlAGListener
     Ensure: Present
-    Name: '{{ sql_server_availability_group_name }}'
-    AvailabilityGroup: '{{ sql_server_availability_group_name }}'
-    ServerName: '{{ ansible_hostname }}'
-    InstanceName: '{{ sql_server_instance_name }}'
-    IpAddress: '{{ sql_server_availability_group_ip_address }}'
+    Name: "{{ alwayson_sql_server_availability_group_name }}"
+    AvailabilityGroup: "{{ alwayson_sql_server_availability_group_name }}"
+    ServerName: "{{ ansible_hostname }}"
+    InstanceName: "{{ alwayson_sql_server_instance_name }}"
+    IpAddress: "{{ alwayson_sql_server_availability_group_ip_address }}"
     Port: 1433
-    PsDscRunAsCredential_username: '{{ mssql_username }}'
-    PsDscRunAsCredential_password: '{{ mssql_password }}'
+    PsDscRunAsCredential_username: "{{ mssql_username }}"
+    PsDscRunAsCredential_password: "{{ mssql_password }}"

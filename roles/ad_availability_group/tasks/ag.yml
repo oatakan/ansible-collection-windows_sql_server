@@ -1,5 +1,4 @@
 ---
-
 - name: add a powershell module
   community.windows.win_psmodule:
     name: ActiveDirectoryDsc
@@ -9,10 +8,10 @@
   ansible.windows.win_dsc:
     resource_name: WindowsFeature
     Name: "{{ item }}"
-    IncludeAllSubFeature: True
+    IncludeAllSubFeature: true
     Ensure: Present
   register: install_ad
-  ignore_errors: true
+  failed_when: false
   loop:
     - RSAT-AD-PowerShell
 
@@ -20,30 +19,31 @@
   ansible.windows.win_dsc:
     resource_name: ADComputer
     Ensure: Present
-    ComputerName: "{{ sql_server_availability_group_listener_name }}"
-    DnsHostName: "{{ sql_server_availability_group_listener_name }}.{{ dns_domain_name }}"
-    Path: '{{ join_ou_path | default("") }}'
-    Description: "AlwaysOn Availability Group Listener Account"
-    EnabledOnCreation: False
-    DomainController: "{{ windows_ad_server_ip }}"
-    PsDscRunAsCredential_username: "{{ domain_admin_username }}@{{ dns_domain_name }}"
+    ComputerName: "{{ ad_availability_group_sql_server_availability_group_listener_name }}"
+    DnsHostName: "{{ ad_availability_group_sql_server_availability_group_listener_name }}.{{ ad_availability_group_dns_domain_name }}"
+    Path: '{{ ad_availability_group_join_ou_path | default("") }}'
+    Description: AlwaysOn Availability Group Listener Account
+    EnabledOnCreation: false
+    DomainController: "{{ ad_availability_group_windows_ad_server_ip }}"
+    PsDscRunAsCredential_username: "{{ domain_admin_username }}@{{ ad_availability_group_dns_domain_name }}"
     PsDscRunAsCredential_password: "{{ domain_admin_password }}"
 
 - name: add full control to cluster name object
   ansible.windows.win_dsc:
     resource_name: ADObjectPermissionEntry
     Ensure: Present
-    Path: 'CN={{ sql_server_availability_group_listener_name }},{{ join_ou_path }}'
-    IdentityReference: '{{ dns_domain_name }}\{{ cluster_name }}$'
-    ActiveDirectoryRights: 'GenericAll'
-    AccessControlType: 'Allow'
-    ObjectType: '00000000-0000-0000-0000-000000000000'
-    ActiveDirectorySecurityInheritance: 'None'
-    InheritedObjectType: '00000000-0000-0000-0000-000000000000'
-    PsDscRunAsCredential_username: "{{ domain_admin_username }}@{{ dns_domain_name }}"
+    Path: CN={{ ad_availability_group_sql_server_availability_group_listener_name }},{{ ad_availability_group_join_ou_path }}
+    IdentityReference: "{{ ad_availability_group_dns_domain_name }}\\{{ ad_availability_group_cluster_name }}$"
+    ActiveDirectoryRights: GenericAll
+    AccessControlType: Allow
+    ObjectType: "00000000-0000-0000-0000-000000000000"
+    ActiveDirectorySecurityInheritance: None
+    InheritedObjectType: "00000000-0000-0000-0000-000000000000"
+    PsDscRunAsCredential_username: "{{ domain_admin_username }}@{{ ad_availability_group_dns_domain_name }}"
     PsDscRunAsCredential_password: "{{ domain_admin_password }}"
 
-- block:
+- name: create DNS A record
+  block:
     - name: add a powershell module
       community.windows.win_psmodule:
         name: DnsServerDsc
@@ -53,24 +53,30 @@
       ansible.windows.win_dsc:
         resource_name: DnsRecordA
         Ensure: Present
-        Name: "{{ sql_server_availability_group_listener_name }}"
-        IPv4Address: "{{ sql_server_availability_group_ipv4_address }}"
-        ZoneName: "{{ dns_domain_name }}"
-  delegate_to: '{{ windows_ad_server_ip }}'
+        Name: "{{ ad_availability_group_sql_server_availability_group_listener_name }}"
+        IPv4Address: "{{ ad_availability_group_sql_server_availability_group_ipv4_address }}"
+        ZoneName: "{{ ad_availability_group_dns_domain_name }}"
+  delegate_to: "{{ ad_availability_group_windows_ad_server_ip }}"
   vars:
-    ansible_user: "{{ domain_admin_username }}@{{ dns_domain_name }}"
+    ansible_user: "{{ domain_admin_username }}@{{ ad_availability_group_dns_domain_name }}"
     ansible_password: "{{ domain_admin_password }}"
 
 - name: update ACL for DNS record of the CMO
   ansible.windows.win_dsc:
     resource_name: ADObjectPermissionEntry
     Ensure: Present
-    Path: 'DC={{ sql_server_availability_group_listener_name }},DC={{ dns_domain_name }},cn=MicrosoftDNS,DC=DomainDnsZones,DC={{ dns_domain_name.split(".")[0] }},DC={{ dns_domain_name.split(".")[1] }}'
-    IdentityReference: '{{ dns_domain_name }}\{{ cluster_name }}$'
-    ActiveDirectoryRights: 'GenericAll'
-    AccessControlType: 'Allow'
-    ObjectType: '00000000-0000-0000-0000-000000000000'
-    ActiveDirectorySecurityInheritance: 'None'
-    InheritedObjectType: '00000000-0000-0000-0000-000000000000'
-    PsDscRunAsCredential_username: "{{ domain_admin_username }}@{{ dns_domain_name }}"
+    Path: >-
+      DC={{ ad_availability_group_sql_server_availability_group_listener_name }},
+      DC={{ ad_availability_group_dns_domain_name }},
+      cn=MicrosoftDNS,
+      DC=DomainDnsZones,
+      DC={{ ad_availability_group_dns_domain_name.split(".")[0] }},
+      DC={{ ad_availability_group_dns_domain_name.split(".")[1] }}
+    IdentityReference: "{{ ad_availability_group_dns_domain_name }}\\{{ ad_availability_group_cluster_name }}$"
+    ActiveDirectoryRights: GenericAll
+    AccessControlType: Allow
+    ObjectType: "00000000-0000-0000-0000-000000000000"
+    ActiveDirectorySecurityInheritance: None
+    InheritedObjectType: "00000000-0000-0000-0000-000000000000"
+    PsDscRunAsCredential_username: "{{ domain_admin_username }}@{{ ad_availability_group_dns_domain_name }}"
     PsDscRunAsCredential_password: "{{ domain_admin_password }}"

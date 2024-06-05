@@ -22,13 +22,13 @@ Requirements
 Role Variables
 --------------
 
-- dns_domain_name: example.com
-- mssql_username: sqladmin
-- mssql_password: ''
-- sql_server_instance_name:  'MSSQLSERVER'
-- sql_server_svc_account_name: SASQLSvcAccount
-- sql_server_agt_svc_account_name: SAAgtSvcAccount
-- sql_server_local_users: false # set this to true to create local users instead of domain users
+- alwayson_common_dns_domain_name: example.com
+- alwayson_common_mssql_username: sqladmin
+- alwayson_common_mssql_password: ''
+- alwayson_common_sql_server_instance_name:  'MSSQLSERVER'
+- alwayson_common_alwayson_common_sql_server_svc_account_name: SASQLSvcAccount
+- alwayson_common_alwayson_common_sql_server_agt_svc_account_name: SAAgtSvcAccount
+- alwayson_common_sql_server_local_users: false # set this to true to create local users instead of domain users
 
 Dependencies
 ------------
@@ -37,11 +37,13 @@ Dependencies
 
 Example Playbook
 ----------------
-
-    - hosts: all
-      roles:
-        - alwayson_common
-
+```yaml
+---
+- name: alwayson common configuration
+  hosts: all
+  roles:
+    - alwayson_common
+```
 License
 -------
 
