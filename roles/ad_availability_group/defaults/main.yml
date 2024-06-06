@@ -8,4 +8,4 @@ ad_availability_group_sql_server_availability_group_listener_name: "{{ sql_serve
 ad_availability_group_sql_server_availability_group_ip_address: "{{ sql_server_availability_group_ip_address | default('192.168.100.11/255.255.255.0') }}"
 ad_availability_group_sql_server_availability_group_ipv4_address: '{{ ad_availability_group_sql_server_availability_group_ip_address.split("/")[0] }}'
 
-ad_availability_group_windows_ad_server_ip: "{{ windows_ad_server_ip: | default('192.168.100.10') }}"
+ad_availability_group_windows_ad_server_ip: "{{ windows_ad_server_ip | default('192.168.100.10') }}"
